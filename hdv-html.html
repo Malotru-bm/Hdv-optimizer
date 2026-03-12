@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#b89600"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="HDV"/>
+<title>HDV Optimizer – Dofus Touch</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0b0f;--surface:#0d0e14;--surface2:#12131a;
+  --border:#b8960022;--border2:#1a1b22;
+  --txt:#e2d9c0;--txt2:#665e4a;--txt3:#3a3528;
+  --gold:#d4a017;--gold2:#b89600;
+}
+body{background:var(--bg);color:var(--txt);font-family:'Crimson Pro',Georgia,serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#b8960055;border-radius:2px}
+input,textarea,button,select{font-family:'Josefin Sans',sans-serif;outline:none}
+textarea{resize:vertical}
+@keyframes fi{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toast{0%{opacity:0;transform:translateY(20px) translateX(-50%)}10%,85%{opacity:1;transform:translateY(0) translateX(-50%)}100%{opacity:0;transform:translateY(-10px) translateX(-50%)}}
+.fi{animation:fi .3s ease}
+.toast-el{animation:toast 2.5s ease forwards;position:fixed;bottom:90px;left:50%;z-index:9999;border-radius:20px;padding:10px 20px;font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:1px;white-space:nowrap;box-shadow:0 4px 20px #00000055}
+.btn{border:none;border-radius:8px;padding:12px 20px;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;cursor:pointer;transition:all .2s}
+.btn:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.btnout{background:none;border-radius:7px;padding:8px 15px;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid var(--border);color:var(--gold)}
+.inp{border-radius:8px;padding:11px 13px;font-size:15px;width:100%;transition:border .2s;background:var(--surface2);border:1px solid var(--border);color:var(--txt)}
+.inp:focus{border-color:var(--gold)!important}
+.lbl{font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:7px;color:var(--txt2)}
+.sc{border-radius:10px;padding:14px;background:var(--surface);border:1px solid var(--border2)}
+.tab-btn{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 6px;flex:1;color:var(--txt2);transition:color .2s}
+.tab-btn.active{color:var(--gold)}
+.tab-btn span.icon{font-size:18px}
+.tab-btn span.lbl2{font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:1px;text-transform:uppercase}
+.tab-btn .bar{width:20px;height:2px;background:var(--gold);border-radius:1px;display:none}
+.tab-btn.active .bar{display:block}
+.chip{cursor:pointer;padding:7px 10px;border-radius:8px;transition:all .2s;font-family:'Josefin Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:6px;border:1px solid var(--border2)}
+.chip.active-chip{background:rgba(184,150,0,0.13);border-color:rgba(184,150,0,.67);color:var(--gold)}
+.trow{display:grid;grid-template-columns:72px 1fr 1fr 1fr;gap:6px;align-items:center;padding:10px 12px;font-family:'Josefin Sans',sans-serif;font-size:11px;border-bottom:1px solid var(--border2)}
+#sidebar{position:fixed;left:-260px;top:0;bottom:0;width:250px;background:var(--surface);border-right:1px solid var(--border);z-index:300;padding:16px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;transition:left .25s}
+#sidebar.open{left:0}
+#overlay{display:none;position:fixed;inset:0;background:#000a;z-index:200}
+#overlay.show{display:block}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.main{padding:16px 14px;padding-bottom:90px;max-width:700px;margin:0 auto}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.sim-box{border-radius:10px;padding:14px;margin-bottom:13px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center}
+.sim-val{font-size:19px;font-family:'Josefin Sans',sans-serif;font-weight:600}
+.sim-lbl{font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase}
+.rank-grid{display:grid;gap:9px}
+.rank-card{display:grid;grid-template-columns:36px 1fr auto;gap:11px;align-items:center;padding:14px;border-radius:10px;background:var(--surface);border:1px solid var(--border2)}
+.toggle{background:var(--gold2);border:none;border-radius:20px;width:50px;height:26px;cursor:pointer;position:relative;transition:background .3s}
+.toggle-knob{position:absolute;top:3px;left:26px;width:20px;height:20px;border-radius:50%;background:#0a0b0f;transition:left .3s}
+.toggle.off{background:#3a3528}
+.toggle.off .toggle-knob{left:3px}
+#chartCanvas{width:100%!important;max-height:260px}
+.goal-bar-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;gap:10px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="overlay" onclick="closeSidebar()"></div>
+<div id="sidebar">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 12px;border-bottom:1px solid var(--border2)">
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase">Articles</div>
+    <button onclick="closeSidebar()" style="background:none;border:none;color:var(--txt2);cursor:pointer;font-size:18px">✕</button>
+  </div>
+  <div id="sidebar-items"></div>
+  <div style="margin-top:12px;border-top:1px solid var(--border2);padding-top:11px">
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:8px">+ Nouvel article</div>
+    <div style="display:flex;gap:5px;margin-bottom:6px">
+      <input id="new-icon" class="inp" style="width:42px;text-align:center;font-size:16px;padding:5px" value="📦" maxlength="2"/>
+      <input id="new-name" class="inp" style="flex:1;font-size:12px;padding:6px 9px" placeholder="Nom…"/>
+    </div>
+    <button class="btn" style="width:100%;padding:8px;font-size:10px;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f" onclick="addItem()">Ajouter</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="openSidebar()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--txt2);padding:2px 6px">☰</button>
+    <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#b89600,#5a4700);display:flex;align-items:center;justify-content:center;font-size:15px">⚖️</div>
+    <div>
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold)">HDV Optimizer</div>
+      <div style="font-size:9px;color:var(--txt2);font-family:'Josefin Sans',sans-serif;letter-spacing:1px">Dofus Touch</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:14px;align-items:center">
+    <div style="text-align:right">
+      <div style="font-size:8px;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;color:var(--txt2);text-transform:uppercase">Profit</div>
+      <div id="hdr-profit" style="font-size:17px;font-family:'Josefin Sans',sans-serif;font-weight:600">—</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:8px;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;color:var(--txt2);text-transform:uppercase">Trades</div>
+      <div id="hdr-trades" style="font-size:17px;color:var(--txt);font-family:'Josefin Sans',sans-serif;font-weight:600">0</div>
+    </div>
+  </div>
+</div>
+
+<!-- GOAL BAR -->
+<div class="goal-bar-wrap hidden" id="goal-bar">
+  <span style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;white-space:nowrap">Objectif</span>
+  <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+    <div id="goal-fill" style="height:100%;border-radius:3px;transition:width .5s;background:linear-gradient(90deg,#b89600,#d4a017)"></div>
+  </div>
+  <span id="goal-label" style="font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--gold);white-space:nowrap"></span>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div id="tab-trade"></div>
+  <div id="tab-calc" class="hidden"></div>
+  <div id="tab-history" class="hidden"></div>
+  <div id="tab-charts" class="hidden"></div>
+  <div id="tab-rankings" class="hidden"></div>
+  <div id="tab-settings" class="hidden"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="tab-btn active" id="nav-trade" onclick="switchTab('trade')"><span class="icon">💰</span><span class="lbl2">Échange</span><div class="bar"></div></button>
+  <button class="tab-btn" id="nav-calc" onclick="switchTab('calc')"><span class="icon">🧮</span><span class="lbl2">Calcul</span><div class="bar"></div></button>
+  <button class="tab-btn" id="nav-history" onclick="switchTab('history')"><span class="icon">📋</span><span class="lbl2">Historique</span><div class="bar"></div></button>
+  <button class="tab-btn" id="nav-charts" onclick="switchTab('charts')"><span class="icon">📈</span><span class="lbl2">Cours</span><div class="bar"></div></button>
+  <button class="tab-btn" id="nav-rankings" onclick="switchTab('rankings')"><span class="icon">🏆</span><span class="lbl2">Classement</span><div class="bar"></div></button>
+  <button class="tab-btn" id="nav-settings" onclick="switchTab('settings')"><span class="icon">⚙️</span><span class="lbl2">Réglages</span><div class="bar"></div></button>
+</div>
+
+<script>
+// ══════════════ STATE ══════════════
+const TAX = 0.03;
+const COLORS = ["#d4a017","#4ade80","#60a5fa","#f472b6","#a78bfa","#fb923c","#34d399","#f87171","#e879f9","#fbbf24"];
+const INIT_ITEMS = [
+  {id:1,name:"Gelano",icon:"💍",history:[],color:COLORS[0],stock:0,note:""},
+  {id:2,name:"Turquoise Dofus",icon:"🥚",history:[],color:COLORS[1],stock:0,note:""},
+  {id:3,name:"Pain d'Amande",icon:"🍞",history:[],color:COLORS[2],stock:0,note:""},
+];
+
+let items = load("hdv_items") || INIT_ITEMS;
+let activeId = items[0]?.id;
+let currentTab = "trade";
+let settings = load("hdv_settings") || {tgtPct:"10",minAlert:"5",goalKamas:"",darkMode:true,chartMode:"cumul"};
+let chartInstance = null;
+let editingNote = false;
+
+function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
+function save(){
+  try{localStorage.setItem("hdv_items",JSON.stringify(items));}catch{}
+  try{localStorage.setItem("hdv_settings",JSON.stringify(settings));}catch{}
+}
+
+// ══════════════ HELPERS ══════════════
+function fmt(n){
+  if(n===null||n===undefined)return"—";
+  const a=Math.abs(n),s=n<0?"-":"";
+  if(a>=1e6)return s+(a/1e6).toFixed(2)+"M";
+  if(a>=1e3)return s+(a/1e3).toFixed(1)+"k";
+  return s+Math.round(a).toString();
+}
+function profit(buy,sell){const tax=Math.ceil(sell*TAX);const net=sell-tax-buy;return{tax,net,pct:buy>0?((net/buy)*100).toFixed(1):"0"};}
+function minSell(buy,tgt){return Math.ceil((buy*(1+tgt/100))/(1-TAX));}
+function pc(n){return n>0?"#4ade80":n<0?"#f87171":"#94a3b8";}
+function getActive(){return items.find(i=>i.id===activeId)||items[0];}
+function totalProfit(){return items.reduce((a,it)=>a+it.history.reduce((s,e)=>s+e.net,0),0);}
+function totalTrades(){return items.reduce((a,it)=>a+it.history.length,0);}
+
+function showToast(msg,type="ok"){
+  document.querySelectorAll(".toast-el").forEach(e=>e.remove());
+  const d=document.createElement("div");
+  d.className="toast-el";
+  d.style.background=type==="warn"?"#7a3a00":"#0a3a1a";
+  d.style.border=`1px solid ${type==="warn"?"#fb923c88":"#4ade8088"}`;
+  d.style.color=type==="warn"?"#fb923c":"#4ade80";
+  d.textContent=msg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2600);
+}
+
+// ══════════════ SIDEBAR ══════════════
+function openSidebar(){document.getElementById("sidebar").classList.add("open");document.getElementById("overlay").classList.add("show");}
+function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("overlay").classList.remove("show");}
+
+function renderSidebar(){
+  const el=document.getElementById("sidebar-items");
+  el.innerHTML="";
+  items.forEach(it=>{
+    const sum=it.history.reduce((s,e)=>s+e.net,0);
+    const d=document.createElement("div");
+    d.className="chip"+(it.id===activeId?" active-chip":"");
+    d.style.marginBottom="3px";
+    d.innerHTML=`<span style="font-size:14px">${it.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${it.id===activeId?"var(--gold)":"var(--txt)"}">${it.name}</div>
+        ${it.stock>0?`<div style="font-size:9px;color:var(--txt2);font-family:'Josefin Sans',sans-serif">📦 ${it.stock} en stock</div>`:""}
+        <div style="font-size:10px;color:${sum!==0?pc(sum):"var(--txt3)"}">${sum!==0?fmt(sum)+" k":"—"}</div>
+      </div>
+      <div style="width:7px;height:7px;border-radius:50%;background:${it.color};flex-shrink:0"></div>`;
+    d.onclick=()=>{activeId=it.id;closeSidebar();renderAll();};
+    el.appendChild(d);
+  });
+}
+
+function addItem(){
+  const name=document.getElementById("new-name").value.trim();
+  const icon=document.getElementById("new-icon").value||"📦";
+  if(!name)return;
+  const it={id:Date.now(),name,icon,history:[],color:COLORS[items.length%COLORS.length],stock:0,note:""};
+  items.push(it);activeId=it.id;
+  document.getElementById("new-name").value="";
+  document.getElementById("new-icon").value="📦";
+  save();closeSidebar();renderAll();
+}
+
+// ══════════════ TABS ══════════════
+function switchTab(tab){
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll("[id^='tab-']").forEach(b=>b.classList.add("hidden"));
+  document.getElementById("nav-"+tab).classList.add("active");
+  document.getElementById("tab-"+tab).classList.remove("hidden");
+  currentTab=tab;
+  if(tab==="charts")renderCharts();
+}
+
+// ══════════════ HEADER ══════════════
+function renderHeader(){
+  const tp=totalProfit();
+  document.getElementById("hdr-profit").textContent=fmt(tp)+" k";
+  document.getElementById("hdr-profit").style.color=pc(tp);
+  document.getElementById("hdr-trades").textContent=totalTrades();
+  // goal bar
+  const gk=parseInt(settings.goalKamas)||0;
+  const bar=document.getElementById("goal-bar");
+  if(gk>0){
+    bar.classList.remove("hidden");
+    const pct=Math.min(100,(tp/gk*100)).toFixed(1);
+    document.getElementById("goal-fill").style.width=pct+"%";
+    document.getElementById("goal-fill").style.background=pct>=100?"linear-gradient(90deg,#b89600,#4ade80)":"linear-gradient(90deg,#b89600,#d4a017)";
+    document.getElementById("goal-label").textContent=`${pct}% · ${fmt(gk)} k`;
+    document.getElementById("goal-label").style.color=pct>=100?"#4ade80":"var(--gold)";
+  } else bar.classList.add("hidden");
+}
+
+// ══════════════ TRADE TAB ══════════════
+function renderTrade(){
+  const el=document.getElementById("tab-trade");
+  const it=getActive();if(!it){el.innerHTML="";return;}
+  const sum=it.history.reduce((s,e)=>s+e.net,0);
+
+  el.innerHTML=`
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+    <span style="font-size:26px">${it.icon}</span>
+    <div style="flex:1">
+      <div style="font-size:19px;color:var(--gold)">${it.name}</div>
+      <div style="font-size:10px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px">${it.history.length} échange(s)</div>
+    </div>
+    ${it.history.length===0?`<button class="btnout" style="border:1px solid #f8717144;color:#f87171;font-size:10px" onclick="deleteItem(${it.id})">Suppr.</button>`:""}
+  </div>
+
+  <!-- note/stock -->
+  <div class="sc" style="margin-bottom:14px" id="note-box">
+    <div id="note-view" style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openNoteEdit()">
+      <div style="flex:1">
+        ${it.stock>0?`<div style="font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--gold);margin-bottom:2px">📦 ${it.stock} unité(s) en stock</div>`:""}
+        <div style="font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--txt2)">${it.note||"Ajouter une note ou le stock…"}</div>
+      </div>
+      <span style="font-size:14px;color:var(--txt3)">✏️</span>
+    </div>
+    <div id="note-edit" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div style="flex:1"><label class="lbl">📦 Stock en vente</label><input class="inp" id="stock-inp" type="number" placeholder="0" value="${it.stock||""}"/></div>
+      </div>
+      <label class="lbl">📝 Notes</label>
+      <textarea class="inp" id="note-inp" style="min-height:60px;padding:9px 12px" placeholder="Ex: prix monte le week-end...">${it.note||""}</textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" style="background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f;flex:1;padding:8px" onclick="saveNote()">Sauvegarder</button>
+        <button class="btnout" onclick="closeNoteEdit()">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:13px">
+    <div><label class="lbl">💸 Prix d'achat</label><input class="inp" id="buy-inp" type="number" placeholder="ex: 850000" oninput="updateSim()"/></div>
+    <div><label class="lbl">🏷️ Prix de vente</label><input class="inp" id="sell-inp" type="number" placeholder="ex: 1000000" oninput="updateSim()" onkeydown="if(event.key==='Enter')addTrade()"/></div>
+  </div>
+
+  <div id="sim-box" style="display:none"></div>
+  <button class="btn" style="width:100%;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f" onclick="addTrade()">Enregistrer l'échange</button>
+
+  <div id="recent-trades" style="margin-top:20px"></div>`;
+
+  renderRecent();
+}
+
+function openNoteEdit(){
+  document.getElementById("note-view").style.display="none";
+  document.getElementById("note-edit").style.display="block";
+}
+function closeNoteEdit(){
+  document.getElementById("note-view").style.display="flex";
+  document.getElementById("note-edit").style.display="none";
+}
+function saveNote(){
+  const it=getActive();if(!it)return;
+  it.note=document.getElementById("note-inp").value;
+  it.stock=parseInt(document.getElementById("stock-inp").value)||0;
+  save();showToast("Sauvegardé ✓");closeNoteEdit();renderAll();
+}
+function deleteItem(id){
+  items=items.filter(i=>i.id!==id);
+  if(activeId===id)activeId=items[0]?.id;
+  save();renderAll();
+}
+
+function updateSim(){
+  const buy=parseInt(document.getElementById("buy-inp")?.value)||0;
+  const sell=parseInt(document.getElementById("sell-inp")?.value)||0;
+  const box=document.getElementById("sim-box");if(!box)return;
+  if(!buy||!sell){box.style.display="none";return;}
+  const p=profit(buy,sell);
+  box.style.display="block";
+  box.style.background="var(--surface2)";
+  box.style.border=`1px solid ${pc(p.net)}44`;
+  box.style.borderRadius="10px";
+  box.style.padding="14px";
+  box.style.marginBottom="13px";
+  box.innerHTML=`
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Simulation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+      <div><div class="sim-lbl">TAXE 3%</div><div class="sim-val" style="font-size:15px;color:#f87171">-${fmt(p.tax)}</div></div>
+      <div style="border-left:1px solid var(--border2);border-right:1px solid var(--border2)"><div class="sim-lbl">BÉNÉFICE</div><div class="sim-val" style="color:${pc(p.net)}">${p.net>0?"+":""}${fmt(p.net)}</div></div>
+      <div><div class="sim-lbl">RENDEMENT</div><div class="sim-val" style="font-size:15px;color:${pc(p.net)}">${p.net>0?"+":""}${p.pct}%</div></div>
+    </div>
+    ${p.net<0?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#f87171">⚠️ Vente à perte</div>`:""}
+    ${p.net>0&&Number(p.pct)>=10?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#4ade80">✨ Excellente marge !</div>`:""}
+    ${p.net>0&&Number(p.pct)<parseFloat(settings.minAlert)?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#fb923c">⚠️ Marge sous ton seuil (${settings.minAlert}%)</div>`:""}
+  `;
+}
+
+function addTrade(){
+  const buy=parseInt(document.getElementById("buy-inp")?.value)||0;
+  const sell=parseInt(document.getElementById("sell-inp")?.value)||0;
+  if(!buy||!sell)return;
+  const it=getActive();if(!it)return;
+  const p=profit(buy,sell);
+  if(Number(p.pct)<parseFloat(settings.minAlert))showToast(`⚠️ Marge ${p.pct}% sous le seuil (${settings.minAlert}%)`,"warn");
+  const now=new Date();
+  const e={id:Date.now(),ts:Date.now(),date:now.toLocaleDateString("fr-FR"),time:now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),buy,sell,tax:p.tax,net:p.net,pct:p.pct};
+  it.history.unshift(e);if(it.history.length>100)it.history.pop();
+  save();
+  document.getElementById("buy-inp").value="";
+  document.getElementById("sell-inp").value="";
+  document.getElementById("sim-box").style.display="none";
+  if(p.net>0)showToast(`+${fmt(p.net)} k enregistré ✓`);
+  renderRecent();renderHeader();renderSidebar();
+}
+
+function renderRecent(){
+  const el=document.getElementById("recent-trades");if(!el)return;
+  const it=getActive();if(!it||it.history.length===0){el.innerHTML="";return;}
+  el.innerHTML=`<div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:9px">Derniers échanges</div>`
+    +it.history.slice(0,5).map(e=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border2);font-family:'Josefin Sans',sans-serif;font-size:12px">
+      <div style="color:var(--txt2);font-size:11px">${e.date} ${e.time}</div>
+      <div style="color:var(--txt2)">${fmt(e.buy)}→${fmt(e.sell)}</div>
+      <div style="color:${pc(e.net)};font-weight:600">${e.net>0?"+":""}${fmt(e.net)} <span style="font-size:10px;font-weight:400">(${e.pct}%)</span></div>
+    </div>`).join("");
+}
+
+// ══════════════ CALC TAB ══════════════
+function renderCalc(){
+  const el=document.getElementById("tab-calc");
+  el.innerHTML=`
+  <div style="font-size:17px;color:var(--gold);margin-bottom:5px">🧮 Prix minimum de revente</div>
+  <div style="font-size:13px;color:var(--txt2);font-family:'Josefin Sans',sans-serif;margin-bottom:18px">Prix plancher pour atteindre ta marge cible après taxe (3%).</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:15px">
+    <div><label class="lbl">💸 Prix d'achat</label><input class="inp" id="calc-buy" type="number" placeholder="ex: 850000" oninput="updateCalc()"/></div>
+    <div><label class="lbl">🎯 Marge cible (%)</label><input class="inp" id="calc-tgt" type="number" placeholder="10" step="0.5" value="${settings.tgtPct}" oninput="updateCalc()"/></div>
+  </div>
+  <div id="calc-result"></div>
+  <div id="calc-table"></div>
+  <div id="calc-empty" style="text-align:center;padding:40px;color:var(--txt3);font-family:'Josefin Sans',sans-serif">Saisis un prix d'achat</div>`;
+}
+
+function updateCalc(){
+  const buy=parseInt(document.getElementById("calc-buy")?.value)||0;
+  const tgt=parseFloat(document.getElementById("calc-tgt")?.value)||0;
+  settings.tgtPct=document.getElementById("calc-tgt")?.value||"10";save();
+  const res=document.getElementById("calc-result");
+  const tbl=document.getElementById("calc-table");
+  const emp=document.getElementById("calc-empty");
+  if(!buy){res.innerHTML="";tbl.innerHTML="";emp.style.display="block";return;}
+  emp.style.display="none";
+  const ms=minSell(buy,tgt);
+  const p=profit(buy,ms);
+  res.innerHTML=`
+  <div style="background:var(--surface2);border-radius:10px;padding:15px 18px;border-left:3px solid var(--gold);margin-bottom:16px">
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Résultat</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-bottom:3px">PRIX MIN. VENTE</div>
+        <div style="font-size:22px;color:var(--gold);font-family:'Josefin Sans',sans-serif;font-weight:600">${fmt(ms)}</div>
+        <div style="font-size:10px;color:var(--txt2);font-family:'Josefin Sans',sans-serif;margin-top:1px">${ms.toLocaleString("fr-FR")} k</div></div>
+      <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-bottom:3px">BÉNÉFICE ATTENDU</div>
+        <div style="font-size:19px;color:#4ade80;font-family:'Josefin Sans',sans-serif;font-weight:600">+${fmt(p.net)}</div>
+        <div style="font-size:10px;color:#4ade80;font-family:'Josefin Sans',sans-serif;margin-top:1px">≥ ${tgt}% net</div></div>
+    </div>
+    <div style="margin-top:11px;padding:8px 12px;background:#ffffff07;border-radius:6px;font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--txt2)">Taxe : ~${fmt(Math.ceil(ms*TAX))} k · Net après taxe : ${fmt(ms-Math.ceil(ms*TAX))} k</div>
+  </div>`;
+  tbl.innerHTML=`<div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:10px">Table des marges</div>
+  <div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border2)">
+    ${[5,10,15,20,30,50].map(p2=>{const m=minSell(buy,p2);return`
+    <div style="display:grid;grid-template-columns:55px 1fr 1fr;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border2);font-family:'Josefin Sans',sans-serif;font-size:12px;align-items:center">
+      <div style="color:var(--gold);font-weight:600">${p2}%</div>
+      <div style="color:var(--txt)">${fmt(m)}</div>
+      <div style="color:#4ade80;text-align:right">+${fmt(profit(buy,m).net)}</div>
+    </div>`;}).join("")}
+  </div>`;
+}
+
+// ══════════════ HISTORY TAB ══════════════
+function renderHistory(){
+  const el=document.getElementById("tab-history");
+  const all=items.flatMap(it=>it.history.map(e=>({...e,iname:it.name,iicon:it.icon}))).sort((a,b)=>b.id-a.id);
+  el.innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px">
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase">Tous les échanges (${all.length})</div>
+    <button class="btnout" onclick="exportCSV()">⬇ CSV</button>
+  </div>
+  <div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border2)">
+    <div class="trow" style="color:var(--txt2);font-size:9px;letter-spacing:1px;border-bottom:1px solid #b8960022">
+      <div>DATE</div><div>ARTICLE</div><div>ACHAT→VENTE</div><div>NET</div>
+    </div>
+    ${all.length===0?`<div style="padding:32px;text-align:center;color:var(--txt3);font-family:'Josefin Sans',sans-serif;font-size:12px">Aucun échange</div>`
+    :all.map(e=>`
+    <div class="trow">
+      <div style="color:var(--txt2);font-size:10px">${e.date}</div>
+      <div style="display:flex;align-items:center;gap:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span>${e.iicon}</span><span>${e.iname}</span></div>
+      <div style="color:var(--txt2);font-size:11px">${fmt(e.buy)}→${fmt(e.sell)}</div>
+      <div style="color:${pc(e.net)};font-weight:600">${e.net>0?"+":""}${fmt(e.net)}</div>
+    </div>`).join("")}
+  </div>`;
+}
+
+// ══════════════ CHARTS TAB ══════════════
+function renderCharts(){
+  const el=document.getElementById("tab-charts");
+  const mode=settings.chartMode||"cumul";
+  el.innerHTML=`
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;flex-wrap:wrap;gap:8px">
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase">Cours dans le temps</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap">
+      ${[["prix","📊 Prix"],["profit","💰 Profit"],["cumul","📈 Cumulé"]].map(([m,lbl])=>`
+      <button onclick="setChartMode('${m}')" style="background:${mode===m?"#b8960022":"none"};border:1px solid ${mode===m?"var(--gold)":"#333"};color:${mode===m?"var(--gold)":"#555"};border-radius:5px;padding:5px 10px;font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer">${lbl}</button>
+      `).join("")}
+    </div>
+  </div>
+  <div style="margin-bottom:13px;display:flex;gap:6px;flex-wrap:wrap" id="chart-filters">
+    ${items.filter(it=>it.history.length>0).map(it=>`
+    <button onclick="toggleChartItem(${it.id})" style="background:${it.color}22;border:1px solid ${it.color};border-radius:20px;padding:4px 11px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:${it.color};cursor:pointer;display:flex;align-items:center;gap:4px"><span>${it.icon}</span>${it.name}</button>
+    `).join("")}
+  </div>
+  <div style="background:var(--surface);border-radius:10px;border:1px solid var(--border2);padding:16px 6px 6px">
+    <canvas id="chartCanvas"></canvas>
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:8px;color:var(--txt3);text-align:center;margin-top:3px;letter-spacing:1px">
+      ${mode==="prix"?"Cours achat vs vente":mode==="profit"?"Profit net par transaction":"Accumulation de richesse"}
+    </div>
+  </div>`;
+  buildChart();
+}
+
+function setChartMode(m){settings.chartMode=m;save();renderCharts();}
+function toggleChartItem(id){/* simplified: just re-render */renderCharts();}
+
+function buildChart(){
+  const canvas=document.getElementById("chartCanvas");if(!canvas)return;
+  if(chartInstance){chartInstance.destroy();chartInstance=null;}
+  const mode=settings.chartMode||"cumul";
+  const visItems=items.filter(it=>it.history.length>0);
+  if(visItems.length===0){canvas.style.display="none";return;}
+  canvas.style.display="block";
+
+  const all=visItems.flatMap(it=>[...it.history].reverse().map(e=>({...e,iname:it.name,icol:it.color}))).sort((a,b)=>a.ts-b.ts);
+  const labels=all.map(e=>e.date+" "+e.time);
+
+  let datasets=[];
+  if(mode==="cumul"){
+    const cum={};visItems.forEach(it=>{cum[it.name]=0;});
+    const rows=all.map(e=>{cum[e.iname]=(cum[e.iname]||0)+e.net;return{...cum,lbl:e.date};});
+    datasets=visItems.map(it=>({label:it.name,data:rows.map(r=>r[it.name]),borderColor:it.color,backgroundColor:it.color+"22",fill:true,tension:.3,pointRadius:0}));
+  } else if(mode==="profit"){
+    datasets=visItems.map(it=>{
+      const byIdx=all.map(e=>e.iname===it.name?e.net:null);
+      return{label:it.name,data:byIdx,backgroundColor:it.color,borderColor:it.color,type:"bar"};
+    });
+  } else {
+    datasets=visItems.flatMap(it=>[
+      {label:it.name+" achat",data:all.map(e=>e.iname===it.name?e.buy:null),borderColor:it.color+"77",fill:false,tension:.3,pointRadius:0,borderDash:[4,2]},
+      {label:it.name+" vente",data:all.map(e=>e.iname===it.name?e.sell:null),borderColor:it.color,fill:false,tension:.3,pointRadius:3},
+    ]);
+  }
+
+  chartInstance=new Chart(canvas,{
+    type: mode==="profit"?"bar":"line",
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:"#665e4a",font:{family:"'Josefin Sans',sans-serif",size:10}}},tooltip:{backgroundColor:"#0d0e14",borderColor:"#b8960033",borderWidth:1,titleColor:"#665e4a",bodyFont:{family:"'Josefin Sans',sans-serif"},callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},
+      scales:{x:{ticks:{color:"#665e4a",font:{size:8},maxTicksLimit:6},grid:{color:"#1a1b22"}},y:{ticks:{color:"#665e4a",font:{size:8},callback:v=>fmt(v)},grid:{color:"#1a1b22"}}},
+    }
+  });
+}
+
+// ══════════════ RANKINGS TAB ══════════════
+function renderRankings(){
+  const el=document.getElementById("tab-rankings");
+  const sorted=[...items].sort((a,b)=>b.history.reduce((s,e)=>s+e.net,0)-a.history.reduce((s,e)=>s+e.net,0));
+  el.innerHTML=`<div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:14px">Performance par article</div>
+  <div class="rank-grid">
+  ${sorted.map((it,rank)=>{
+    const sum=it.history.reduce((s,e)=>s+e.net,0);
+    const avgPct=it.history.length>0?(it.history.reduce((s,e)=>s+Number(e.pct),0)/it.history.length).toFixed(1):null;
+    const best=it.history.length>0?Math.max(...it.history.map(e=>e.net)):null;
+    const medal=rank===0?"🥇":rank===1?"🥈":rank===2?"🥉":`<span style="color:var(--txt3)">#${rank+1}</span>`;
+    return `<div class="rank-card">
+      <div style="font-size:16px;text-align:center">${medal}</div>
+      <div>
+        <div style="display:flex;align-items:center;gap:5px"><span style="font-size:14px">${it.icon}</span><span style="font-size:14px;color:var(--gold)">${it.name}</span></div>
+        <div style="font-size:10px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-top:1px">${it.history.length} trades${it.stock>0?` · 📦${it.stock}`:""}</div>
+        ${it.note?`<div style="font-size:10px;color:var(--txt3);font-family:'Josefin Sans',sans-serif;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px">${it.note}</div>`:""}
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:13px;color:${pc(sum)};font-family:'Josefin Sans',sans-serif;font-weight:600">${sum>0?"+":""}${fmt(sum)} k</div>
+        <div style="font-size:11px;color:${avgPct?pc(Number(avgPct)):"var(--txt3)"};font-family:'Josefin Sans',sans-serif">${avgPct?`moy. ${avgPct}%`:"—"}</div>
+        ${best!==null?`<div style="font-size:10px;color:#d4a01799;font-family:'Josefin Sans',sans-serif">best ${fmt(best)}</div>`:""}
+      </div>
+    </div>`;
+  }).join("")}
+  </div>`;
+}
+
+// ══════════════ SETTINGS TAB ══════════════
+function renderSettings(){
+  const el=document.getElementById("tab-settings");
+  const tp=totalProfit();
+  const gk=parseInt(settings.goalKamas)||0;
+  const pct=gk>0?Math.min(100,(tp/gk*100)).toFixed(1):null;
+  const bestItem=[...items].sort((a,b)=>b.history.reduce((s,e)=>s+e.net,0)-a.history.reduce((s,e)=>s+e.net,0))[0];
+  el.innerHTML=`
+  <div style="font-size:17px;color:var(--gold);margin-bottom:18px">⚙️ Réglages</div>
+  <div style="display:grid;gap:13px">
+
+    <div class="sc">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Apparence</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Josefin Sans',sans-serif;font-size:13px">Thème ${settings.darkMode!==false?"sombre 🌙":"clair ☀️"}</div>
+        <button class="toggle ${settings.darkMode===false?"off":""}" id="dark-toggle" onclick="toggleDark()"><div class="toggle-knob"></div></button>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Objectif kamas</div>
+      <label class="lbl">🎯 Objectif total (kamas)</label>
+      <input class="inp" id="goal-inp" type="number" placeholder="ex: 10000000" value="${settings.goalKamas||""}" oninput="updateGoal()"/>
+      ${gk>0?`<div style="margin-top:10px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--txt2)">Progression : <span style="color:${pct>=100?"#4ade80":"var(--gold)"};font-weight:600">${pct}%</span> · Reste : <span style="color:#f87171">${fmt(gk-tp)} k</span></div>`:""}
+    </div>
+
+    <div class="sc">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Alerte de marge</div>
+      <label class="lbl">⚠️ Seuil minimum de marge (%)</label>
+      <input class="inp" id="alert-inp" type="number" step="0.5" placeholder="ex: 5" value="${settings.minAlert||"5"}" oninput="updateAlert()"/>
+      <div style="margin-top:8px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--txt2)">Une alerte s'affiche si tu enregistres un échange sous ${settings.minAlert}% de marge.</div>
+    </div>
+
+    <div class="sc">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Export / Import</div>
+      <button class="btn" style="width:100%;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f;margin-bottom:10px" onclick="exportCSV()">⬇ Exporter CSV complet</button>
+      <label style="display:block;width:100%;cursor:pointer;margin-bottom:10px">
+        <div style="width:100%;background:none;border:1px solid #b8960066;color:var(--gold);text-align:center;padding:11px 20px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;border-radius:8px">⬆ Importer CSV</div>
+        <input type="file" accept=".csv,text/csv" style="display:none" onchange="importCSV(event)"/>
+      </label>
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--txt3);text-align:center;line-height:1.6">Importe un CSV exporté précédemment.<br/>Les données sont fusionnées sans doublons.</div>
+    </div>
+
+    <div class="sc">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Statistiques globales</div>
+      ${[
+        ["💰 Profit total",fmt(tp)+" k",pc(tp)],
+        ["📊 Nombre d'échanges",totalTrades(),"var(--txt)"],
+        ["📦 Stock total suivi",items.reduce((a,it)=>a+(it.stock||0),0)+" unités","var(--gold)"],
+        ["🏆 Meilleur article",bestItem?.name||"—","var(--gold)"]
+      ].map(([k,v,c])=>`
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border2);font-family:'Josefin Sans',sans-serif;font-size:12px">
+        <span style="color:var(--txt2)">${k}</span><span style="color:${c};font-weight:600">${v}</span>
+      </div>`).join("")}
+    </div>
+
+    <div class="sc" style="text-align:center">
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Installer sur Samsung</div>
+      <div style="font-family:'Josefin Sans',sans-serif;font-size:12px;color:var(--txt2);line-height:1.8">
+        1. Ouvre cette page dans <b style="color:var(--gold)">Chrome</b><br/>
+        2. Appuie sur ⋮ (les 3 points en haut à droite)<br/>
+        3. Sélectionne <b style="color:var(--gold)">"Ajouter à l'écran d'accueil"</b><br/>
+        4. Confirme → l'icône apparaît sur ton bureau 🎉
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleDark(){
+  settings.darkMode=settings.darkMode===false?true:false;
+  applyTheme();save();renderSettings();
+}
+function applyTheme(){
+  const d=settings.darkMode!==false;
+  const r=document.documentElement.style;
+  r.setProperty("--bg",d?"#0a0b0f":"#f5f0e8");
+  r.setProperty("--surface",d?"#0d0e14":"#ffffff");
+  r.setProperty("--surface2",d?"#12131a":"#f0ebe0");
+  r.setProperty("--border",d?"#b8960022":"#d4a01733");
+  r.setProperty("--border2",d?"#1a1b22":"#e8e0cc");
+  r.setProperty("--txt",d?"#e2d9c0":"#2a2010");
+  r.setProperty("--txt2",d?"#665e4a":"#9a8060");
+  r.setProperty("--txt3",d?"#3a3528":"#c0b090");
+}
+function updateGoal(){settings.goalKamas=document.getElementById("goal-inp")?.value||"";save();renderHeader();}
+function updateAlert(){settings.minAlert=document.getElementById("alert-inp")?.value||"5";save();}
+
+// ══════════════ CSV ══════════════
+function exportCSV(){
+  const rows=[["Date","Heure","Article","Achat","Vente","Taxe","Net","Rendement %"]];
+  items.forEach(it=>[...it.history].reverse().forEach(e=>rows.push([e.date,e.time,it.name,e.buy,e.sell,e.tax,e.net,e.pct])));
+  const blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`hdv_${new Date().toLocaleDateString("fr-FR").replace(/\//g,"-")}.csv`;a.click();
+  showToast("Export CSV téléchargé ✓");
+}
+
+function importCSV(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    try{
+      const text=ev.target.result.replace(/^\uFEFF/,"");
+      const lines=text.split("\n").filter(l=>l.trim());
+      const rows=lines.slice(1).map(l=>l.split(";"));
+      const byItem={};
+      rows.forEach(r=>{
+        if(r.length<7)return;
+        const [date,time,name,buy,sell,tax,net,pct]=r;
+        if(!byItem[name])byItem[name]={name,entries:[]};
+        byItem[name].entries.push({id:Date.now()+Math.random(),ts:Date.now(),date:date?.trim(),time:time?.trim(),buy:parseInt(buy)||0,sell:parseInt(sell)||0,tax:parseInt(tax)||0,net:parseInt(net)||0,pct:pct?.trim()||"0"});
+      });
+      Object.entries(byItem).forEach(([name,data])=>{
+        const existing=items.find(it=>it.name===name);
+        if(existing){
+          const keys=new Set(existing.history.map(h=>h.date+"_"+h.time+"_"+h.buy));
+          const newE=data.entries.filter(e=>!keys.has(e.date+"_"+e.time+"_"+e.buy));
+          existing.history=[...newE,...existing.history].slice(0,100);
+        } else {
+          items.push({id:Date.now()+Math.random(),name,icon:"📦",history:data.entries,color:COLORS[items.length%COLORS.length],stock:0,note:""});
+        }
+      });
+      save();renderAll();showToast(`Import réussi : ${rows.length} ligne(s) ✓`);
+    }catch{showToast("Erreur lors de l'import ⚠️","warn");}
+  };
+  reader.readAsText(file,"UTF-8");
+  e.target.value="";
+}
+
+// ══════════════ RENDER ALL ══════════════
+function renderAll(){
+  renderSidebar();
+  renderHeader();
+  renderTrade();
+  renderCalc();
+  renderHistory();
+  renderRankings();
+  renderSettings();
+  if(currentTab==="charts")renderCharts();
+}
+
+// ══════════════ PWA ══════════════
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{
+  e.preventDefault();deferredPrompt=e;
+  const banner=document.createElement("div");
+  banner.id="install-banner";
+  banner.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:1px;box-shadow:0 2px 12px #00000055";
+  banner.innerHTML=`<span>⚖️ Installer HDV sur l'écran d'accueil</span><div style="display:flex;gap:8px"><button onclick="doInstall()" style="background:#0a0b0f;color:#d4a017;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:600">Installer</button><button onclick="document.getElementById('install-banner').remove()" style="background:none;border:none;color:#0a0b0f;cursor:pointer;font-size:16px;padding:0 4px">✕</button></div>`;
+  document.body.appendChild(banner);
+});
+
+function doInstall(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r=>{if(r.outcome==="accepted")document.getElementById("install-banner")?.remove();});
+}
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("data:application/javascript,"+encodeURIComponent(`
+    const C="hdv-v1";
+    self.addEventListener("install",e=>{self.skipWaiting();});
+    self.addEventListener("activate",e=>{self.clients.claim();});
+    self.addEventListener("fetch",e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});
+  `)).catch(()=>{});
+}
+
+// ══════════════ INIT ══════════════
+applyTheme();
+renderAll();
+switchTab("trade");
+</script>
+</body>
+</html>
