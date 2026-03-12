@@ -42,7 +42,7 @@ textarea{resize:vertical}
 .tab-btn.active .bar{display:block}
 .chip{cursor:pointer;padding:7px 10px;border-radius:8px;transition:all .2s;font-family:'Josefin Sans',sans-serif;font-size:12px;display:flex;align-items:center;gap:6px;border:1px solid var(--border2)}
 .chip.active-chip{background:rgba(184,150,0,0.13);border-color:rgba(184,150,0,.67);color:var(--gold)}
-.trow{display:grid;grid-template-columns:72px 1fr 1fr 1fr;gap:6px;align-items:center;padding:10px 12px;font-family:'Josefin Sans',sans-serif;font-size:11px;border-bottom:1px solid var(--border2)}
+.trow{display:grid;grid-template-columns:60px 1fr 1fr 1fr;gap:6px;align-items:center;padding:10px 12px;font-family:'Josefin Sans',sans-serif;font-size:11px;border-bottom:1px solid var(--border2)}
 #sidebar{position:fixed;left:-260px;top:0;bottom:0;width:250px;background:var(--surface);border-right:1px solid var(--border);z-index:300;padding:16px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;transition:left .25s}
 #sidebar.open{left:0}
 #overlay{display:none;position:fixed;inset:0;background:#000a;z-index:200}
@@ -50,18 +50,18 @@ textarea{resize:vertical}
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .main{padding:16px 14px;padding-bottom:90px;max-width:700px;margin:0 auto}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.sim-box{border-radius:10px;padding:14px;margin-bottom:13px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center}
-.sim-val{font-size:19px;font-family:'Josefin Sans',sans-serif;font-weight:600}
-.sim-lbl{font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase}
 .rank-grid{display:grid;gap:9px}
 .rank-card{display:grid;grid-template-columns:36px 1fr auto;gap:11px;align-items:center;padding:14px;border-radius:10px;background:var(--surface);border:1px solid var(--border2)}
 .toggle{background:var(--gold2);border:none;border-radius:20px;width:50px;height:26px;cursor:pointer;position:relative;transition:background .3s}
 .toggle-knob{position:absolute;top:3px;left:26px;width:20px;height:20px;border-radius:50%;background:#0a0b0f;transition:left .3s}
 .toggle.off{background:#3a3528}
 .toggle.off .toggle-knob{left:3px}
-#chartCanvas{width:100%!important;max-height:260px}
 .goal-bar-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:6px 16px;display:flex;align-items:center;gap:10px}
 .hidden{display:none!important}
+.type-badge{display:inline-block;font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-left:6px}
+.badge-hdv{background:#b8960022;color:var(--gold);border:1px solid #b8960044}
+.badge-res{background:#4ade8022;color:#4ade80;border:1px solid #4ade8044}
+.section-title{font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;padding:8px 6px 4px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -79,6 +79,11 @@ textarea{resize:vertical}
     <div style="display:flex;gap:5px;margin-bottom:6px">
       <input id="new-icon" class="inp" style="width:42px;text-align:center;font-size:16px;padding:5px" value="📦" maxlength="2"/>
       <input id="new-name" class="inp" style="flex:1;font-size:12px;padding:6px 9px" placeholder="Nom…"/>
+    </div>
+    <!-- Type selector -->
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button id="type-hdv" onclick="selectNewType('hdv')" style="flex:1;padding:7px;border-radius:7px;font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;border:1px solid var(--gold);background:#b8960022;color:var(--gold)">⚖️ HDV</button>
+      <button id="type-res" onclick="selectNewType('res')" style="flex:1;padding:7px;border-radius:7px;font-family:'Josefin Sans',sans-serif;font-size:10px;letter-spacing:1px;cursor:pointer;border:1px solid var(--border2);background:none;color:var(--txt2)">🌿 Ressource</button>
     </div>
     <button class="btn" style="width:100%;padding:8px;font-size:10px;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f" onclick="addItem()">Ajouter</button>
   </div>
@@ -136,29 +141,29 @@ textarea{resize:vertical}
 </div>
 
 <script>
-// ══════════════ STATE ══════════════
-const TAX = 0.03;
-const COLORS = ["#d4a017","#4ade80","#60a5fa","#f472b6","#a78bfa","#fb923c","#34d399","#f87171","#e879f9","#fbbf24"];
-const INIT_ITEMS = [
-  {id:1,name:"Gelano",icon:"💍",history:[],color:COLORS[0],stock:0,note:""},
-  {id:2,name:"Turquoise Dofus",icon:"🥚",history:[],color:COLORS[1],stock:0,note:""},
-  {id:3,name:"Pain d'Amande",icon:"🍞",history:[],color:COLORS[2],stock:0,note:""},
+const TAX=0.03;
+const COLORS=["#d4a017","#4ade80","#60a5fa","#f472b6","#a78bfa","#fb923c","#34d399","#f87171","#e879f9","#fbbf24"];
+const INIT_ITEMS=[
+  {id:1,name:"Gelano",icon:"💍",type:"hdv",history:[],color:COLORS[0],stock:0,note:""},
+  {id:2,name:"Turquoise Dofus",icon:"🥚",type:"hdv",history:[],color:COLORS[1],stock:0,note:""},
+  {id:3,name:"Pain d'Amande",icon:"🍞",type:"hdv",history:[],color:COLORS[2],stock:0,note:""},
 ];
 
-let items = load("hdv_items") || INIT_ITEMS;
-let activeId = items[0]?.id;
-let currentTab = "trade";
-let settings = load("hdv_settings") || {tgtPct:"10",minAlert:"5",goalKamas:"",darkMode:true,chartMode:"cumul"};
-let chartInstance = null;
-let editingNote = false;
+let items=load("hdv_items")||INIT_ITEMS;
+// migration: add type if missing
+items=items.map(it=>({...it,type:it.type||"hdv"}));
+
+let activeId=items[0]?.id;
+let currentTab="trade";
+let settings=load("hdv_settings")||{tgtPct:"10",minAlert:"5",goalKamas:"",darkMode:true,chartMode:"cumul"};
+let chartInstance=null;
+let newItemType="hdv";
 
 function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}}
 function save(){
   try{localStorage.setItem("hdv_items",JSON.stringify(items));}catch{}
   try{localStorage.setItem("hdv_settings",JSON.stringify(settings));}catch{}
 }
-
-// ══════════════ HELPERS ══════════════
 function fmt(n){
   if(n===null||n===undefined)return"—";
   const a=Math.abs(n),s=n<0?"-":"";
@@ -185,42 +190,65 @@ function showToast(msg,type="ok"){
   setTimeout(()=>d.remove(),2600);
 }
 
-// ══════════════ SIDEBAR ══════════════
+// ── SIDEBAR ──
 function openSidebar(){document.getElementById("sidebar").classList.add("open");document.getElementById("overlay").classList.add("show");}
 function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("overlay").classList.remove("show");}
+
+function selectNewType(t){
+  newItemType=t;
+  document.getElementById("type-hdv").style.border=t==="hdv"?"1px solid var(--gold)":"1px solid var(--border2)";
+  document.getElementById("type-hdv").style.background=t==="hdv"?"#b8960022":"none";
+  document.getElementById("type-hdv").style.color=t==="hdv"?"var(--gold)":"var(--txt2)";
+  document.getElementById("type-res").style.border=t==="res"?"1px solid #4ade80":"1px solid var(--border2)";
+  document.getElementById("type-res").style.background=t==="res"?"#4ade8022":"none";
+  document.getElementById("type-res").style.color=t==="res"?"#4ade80":"var(--txt2)";
+}
 
 function renderSidebar(){
   const el=document.getElementById("sidebar-items");
   el.innerHTML="";
-  items.forEach(it=>{
-    const sum=it.history.reduce((s,e)=>s+e.net,0);
-    const d=document.createElement("div");
-    d.className="chip"+(it.id===activeId?" active-chip":"");
-    d.style.marginBottom="3px";
-    d.innerHTML=`<span style="font-size:14px">${it.icon}</span>
-      <div style="flex:1;min-width:0">
-        <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${it.id===activeId?"var(--gold)":"var(--txt)"}">${it.name}</div>
-        ${it.stock>0?`<div style="font-size:9px;color:var(--txt2);font-family:'Josefin Sans',sans-serif">📦 ${it.stock} en stock</div>`:""}
-        <div style="font-size:10px;color:${sum!==0?pc(sum):"var(--txt3)"}">${sum!==0?fmt(sum)+" k":"—"}</div>
-      </div>
-      <div style="width:7px;height:7px;border-radius:50%;background:${it.color};flex-shrink:0"></div>`;
-    d.onclick=()=>{activeId=it.id;closeSidebar();renderAll();};
-    el.appendChild(d);
-  });
+  const hdv=items.filter(i=>i.type==="hdv"||!i.type);
+  const res=items.filter(i=>i.type==="res");
+
+  const renderGroup=(group,label,emoji)=>{
+    if(!group.length)return;
+    const sec=document.createElement("div");
+    sec.className="section-title";
+    sec.textContent=`${emoji} ${label}`;
+    el.appendChild(sec);
+    group.forEach(it=>{
+      const sum=it.history.reduce((s,e)=>s+e.net,0);
+      const d=document.createElement("div");
+      d.className="chip"+(it.id===activeId?" active-chip":"");
+      d.style.marginBottom="3px";
+      d.innerHTML=`<span style="font-size:14px">${it.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:${it.id===activeId?"var(--gold)":"var(--txt)"}">${it.name}</div>
+          ${it.stock>0?`<div style="font-size:9px;color:var(--txt2)">📦 ${it.stock} en stock</div>`:""}
+          <div style="font-size:10px;color:${sum!==0?pc(sum):"var(--txt3)"}">${sum!==0?fmt(sum)+" k":"—"}</div>
+        </div>
+        <div style="width:7px;height:7px;border-radius:50%;background:${it.color};flex-shrink:0"></div>`;
+      d.onclick=()=>{activeId=it.id;closeSidebar();renderAll();};
+      el.appendChild(d);
+    });
+  };
+
+  renderGroup(hdv,"Équipements HDV","⚖️");
+  renderGroup(res,"Ressources","🌿");
 }
 
 function addItem(){
   const name=document.getElementById("new-name").value.trim();
   const icon=document.getElementById("new-icon").value||"📦";
   if(!name)return;
-  const it={id:Date.now(),name,icon,history:[],color:COLORS[items.length%COLORS.length],stock:0,note:""};
+  const it={id:Date.now(),name,icon,type:newItemType,history:[],color:COLORS[items.length%COLORS.length],stock:0,note:""};
   items.push(it);activeId=it.id;
   document.getElementById("new-name").value="";
   document.getElementById("new-icon").value="📦";
   save();closeSidebar();renderAll();
 }
 
-// ══════════════ TABS ══════════════
+// ── TABS ──
 function switchTab(tab){
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll("[id^='tab-']").forEach(b=>b.classList.add("hidden"));
@@ -230,13 +258,12 @@ function switchTab(tab){
   if(tab==="charts")renderCharts();
 }
 
-// ══════════════ HEADER ══════════════
+// ── HEADER ──
 function renderHeader(){
   const tp=totalProfit();
   document.getElementById("hdr-profit").textContent=fmt(tp)+" k";
   document.getElementById("hdr-profit").style.color=pc(tp);
   document.getElementById("hdr-trades").textContent=totalTrades();
-  // goal bar
   const gk=parseInt(settings.goalKamas)||0;
   const bar=document.getElementById("goal-bar");
   if(gk>0){
@@ -249,24 +276,27 @@ function renderHeader(){
   } else bar.classList.add("hidden");
 }
 
-// ══════════════ TRADE TAB ══════════════
+// ── TRADE TAB (HDV + Ressource) ──
 function renderTrade(){
   const el=document.getElementById("tab-trade");
   const it=getActive();if(!it){el.innerHTML="";return;}
-  const sum=it.history.reduce((s,e)=>s+e.net,0);
+  const isRes=it.type==="res";
 
   el.innerHTML=`
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
     <span style="font-size:26px">${it.icon}</span>
     <div style="flex:1">
-      <div style="font-size:19px;color:var(--gold)">${it.name}</div>
-      <div style="font-size:10px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px">${it.history.length} échange(s)</div>
+      <div style="font-size:19px;color:var(--gold);display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+        ${it.name}
+        <span class="type-badge ${isRes?"badge-res":"badge-hdv"}">${isRes?"🌿 Ressource":"⚖️ HDV"}</span>
+      </div>
+      <div style="font-size:10px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px">${it.history.length} vente(s)</div>
     </div>
     ${it.history.length===0?`<button class="btnout" style="border:1px solid #f8717144;color:#f87171;font-size:10px" onclick="deleteItem(${it.id})">Suppr.</button>`:""}
   </div>
 
   <!-- note/stock -->
-  <div class="sc" style="margin-bottom:14px" id="note-box">
+  <div class="sc" style="margin-bottom:14px">
     <div id="note-view" style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="openNoteEdit()">
       <div style="flex:1">
         ${it.stock>0?`<div style="font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--gold);margin-bottom:2px">📦 ${it.stock} unité(s) en stock</div>`:""}
@@ -279,7 +309,7 @@ function renderTrade(){
         <div style="flex:1"><label class="lbl">📦 Stock en vente</label><input class="inp" id="stock-inp" type="number" placeholder="0" value="${it.stock||""}"/></div>
       </div>
       <label class="lbl">📝 Notes</label>
-      <textarea class="inp" id="note-inp" style="min-height:60px;padding:9px 12px" placeholder="Ex: prix monte le week-end...">${it.note||""}</textarea>
+      <textarea class="inp" id="note-inp" style="min-height:60px;padding:9px 12px" placeholder="Ex: drop sur tel monstre...">${it.note||""}</textarea>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn" style="background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f;flex:1;padding:8px" onclick="saveNote()">Sauvegarder</button>
         <button class="btnout" onclick="closeNoteEdit()">Annuler</button>
@@ -287,17 +317,36 @@ function renderTrade(){
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:13px">
-    <div><label class="lbl">💸 Prix d'achat</label><input class="inp" id="buy-inp" type="number" placeholder="ex: 850000" oninput="updateSim()"/></div>
-    <div><label class="lbl">🏷️ Prix de vente</label><input class="inp" id="sell-inp" type="number" placeholder="ex: 1000000" oninput="updateSim()" onkeydown="if(event.key==='Enter')addTrade()"/></div>
-  </div>
+  ${isRes ? renderResForm() : renderHdvForm()}
 
   <div id="sim-box" style="display:none"></div>
-  <button class="btn" style="width:100%;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f" onclick="addTrade()">Enregistrer l'échange</button>
+  <button class="btn" style="width:100%;background:linear-gradient(135deg,${isRes?"#166534,#14532d":"#b89600,#7a6100"});color:${isRes?"#f0fdf4":"#0a0b0f"}" onclick="${isRes?"addResTrade()":"addTrade()"}">
+    ${isRes?"🌿 Enregistrer la vente":"Enregistrer l'échange"}
+  </button>
 
   <div id="recent-trades" style="margin-top:20px"></div>`;
 
   renderRecent();
+}
+
+function renderHdvForm(){
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:13px">
+    <div><label class="lbl">💸 Prix d'achat</label><input class="inp" id="buy-inp" type="number" placeholder="ex: 850000" oninput="updateSim()"/></div>
+    <div><label class="lbl">🏷️ Prix de vente</label><input class="inp" id="sell-inp" type="number" placeholder="ex: 1000000" oninput="updateSim()" onkeydown="if(event.key==='Enter')addTrade()"/></div>
+  </div>`;
+}
+
+function renderResForm(){
+  const it=getActive();
+  const lastCraft=it.history.length>0?it.history[0].craftCost||0:0;
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px">
+    <div><label class="lbl">🔨 Coût de craft / unité</label><input class="inp" id="craft-inp" type="number" placeholder="0 si droppé" value="${lastCraft||""}" oninput="updateResSim()"/></div>
+    <div><label class="lbl">🏷️ Prix de vente / unité</label><input class="inp" id="sell-inp" type="number" placeholder="ex: 5000" oninput="updateResSim()"/></div>
+  </div>
+  <div style="margin-bottom:13px">
+    <label class="lbl">📦 Quantité vendue</label>
+    <input class="inp" id="qty-inp" type="number" placeholder="ex: 50" value="1" oninput="updateResSim()"/>
+  </div>`;
 }
 
 function openNoteEdit(){
@@ -320,29 +369,50 @@ function deleteItem(id){
   save();renderAll();
 }
 
+// HDV sim
 function updateSim(){
   const buy=parseInt(document.getElementById("buy-inp")?.value)||0;
   const sell=parseInt(document.getElementById("sell-inp")?.value)||0;
   const box=document.getElementById("sim-box");if(!box)return;
   if(!buy||!sell){box.style.display="none";return;}
   const p=profit(buy,sell);
-  box.style.display="block";
-  box.style.background="var(--surface2)";
-  box.style.border=`1px solid ${pc(p.net)}44`;
-  box.style.borderRadius="10px";
-  box.style.padding="14px";
-  box.style.marginBottom="13px";
+  box.style.cssText="display:block;background:var(--surface2);border:1px solid "+pc(p.net)+"44;border-radius:10px;padding:14px;margin-bottom:13px";
   box.innerHTML=`
     <div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Simulation</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
-      <div><div class="sim-lbl">TAXE 3%</div><div class="sim-val" style="font-size:15px;color:#f87171">-${fmt(p.tax)}</div></div>
-      <div style="border-left:1px solid var(--border2);border-right:1px solid var(--border2)"><div class="sim-lbl">BÉNÉFICE</div><div class="sim-val" style="color:${pc(p.net)}">${p.net>0?"+":""}${fmt(p.net)}</div></div>
-      <div><div class="sim-lbl">RENDEMENT</div><div class="sim-val" style="font-size:15px;color:${pc(p.net)}">${p.net>0?"+":""}${p.pct}%</div></div>
+      <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">TAXE 3%</div><div style="font-size:15px;color:#f87171;font-family:'Josefin Sans',sans-serif">-${fmt(p.tax)}</div></div>
+      <div style="border-left:1px solid var(--border2);border-right:1px solid var(--border2)"><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">BÉNÉFICE</div><div style="font-size:19px;color:${pc(p.net)};font-family:'Josefin Sans',sans-serif;font-weight:600">${p.net>0?"+":""}${fmt(p.net)}</div></div>
+      <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">RENDEMENT</div><div style="font-size:15px;color:${pc(p.net)};font-family:'Josefin Sans',sans-serif">${p.net>0?"+":""}${p.pct}%</div></div>
     </div>
     ${p.net<0?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#f87171">⚠️ Vente à perte</div>`:""}
     ${p.net>0&&Number(p.pct)>=10?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#4ade80">✨ Excellente marge !</div>`:""}
-    ${p.net>0&&Number(p.pct)<parseFloat(settings.minAlert)?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#fb923c">⚠️ Marge sous ton seuil (${settings.minAlert}%)</div>`:""}
-  `;
+    ${p.net>0&&Number(p.pct)<parseFloat(settings.minAlert)?`<div style="margin-top:8px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#fb923c">⚠️ Marge sous ton seuil (${settings.minAlert}%)</div>`:""}`;
+}
+
+// Ressource sim
+function updateResSim(){
+  const craft=parseInt(document.getElementById("craft-inp")?.value)||0;
+  const sell=parseInt(document.getElementById("sell-inp")?.value)||0;
+  const qty=parseInt(document.getElementById("qty-inp")?.value)||1;
+  const box=document.getElementById("sim-box");if(!box)return;
+  if(!sell||!qty){box.style.display="none";return;}
+  const taxUnit=Math.ceil(sell*TAX);
+  const netUnit=sell-taxUnit-craft;
+  const netTotal=netUnit*qty;
+  const pct=craft>0?((netUnit/craft)*100).toFixed(1):"∞";
+  box.style.cssText="display:block;background:var(--surface2);border:1px solid "+pc(netTotal)+"44;border-radius:10px;padding:14px;margin-bottom:13px";
+  box.innerHTML=`
+    <div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Simulation · ${qty} unité(s)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+      <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">NET/UNITÉ</div><div style="font-size:15px;color:${pc(netUnit)};font-family:'Josefin Sans',sans-serif;font-weight:600">${netUnit>0?"+":""}${fmt(netUnit)}</div></div>
+      <div style="border-left:1px solid var(--border2);border-right:1px solid var(--border2)"><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">TOTAL NET</div><div style="font-size:19px;color:${pc(netTotal)};font-family:'Josefin Sans',sans-serif;font-weight:600">${netTotal>0?"+":""}${fmt(netTotal)}</div></div>
+      <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);letter-spacing:1px;margin-bottom:3px;text-transform:uppercase">MARGE</div><div style="font-size:15px;color:${pc(netUnit)};font-family:'Josefin Sans',sans-serif">${pct}%</div></div>
+    </div>
+    <div style="margin-top:8px;padding:6px 10px;background:#ffffff07;border-radius:6px;font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--txt2);display:flex;justify-content:space-between">
+      <span>Taxe/unité : -${fmt(taxUnit)}</span>
+      <span>${craft===0?"🎁 Droppé (coût 0)":"🔨 Crafté"}</span>
+    </div>
+    ${netTotal<0?`<div style="margin-top:6px;text-align:center;font-size:11px;font-family:'Josefin Sans',sans-serif;color:#f87171">⚠️ Vente à perte</div>`:""}`;
 }
 
 function addTrade(){
@@ -351,9 +421,9 @@ function addTrade(){
   if(!buy||!sell)return;
   const it=getActive();if(!it)return;
   const p=profit(buy,sell);
-  if(Number(p.pct)<parseFloat(settings.minAlert))showToast(`⚠️ Marge ${p.pct}% sous le seuil (${settings.minAlert}%)`,"warn");
+  if(Number(p.pct)<parseFloat(settings.minAlert))showToast(`⚠️ Marge ${p.pct}% sous le seuil`,"warn");
   const now=new Date();
-  const e={id:Date.now(),ts:Date.now(),date:now.toLocaleDateString("fr-FR"),time:now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),buy,sell,tax:p.tax,net:p.net,pct:p.pct};
+  const e={id:Date.now(),ts:Date.now(),date:now.toLocaleDateString("fr-FR"),time:now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),buy,sell,tax:p.tax,net:p.net,pct:p.pct,type:"hdv"};
   it.history.unshift(e);if(it.history.length>100)it.history.pop();
   save();
   document.getElementById("buy-inp").value="";
@@ -363,31 +433,55 @@ function addTrade(){
   renderRecent();renderHeader();renderSidebar();
 }
 
+function addResTrade(){
+  const craft=parseInt(document.getElementById("craft-inp")?.value)||0;
+  const sell=parseInt(document.getElementById("sell-inp")?.value)||0;
+  const qty=parseInt(document.getElementById("qty-inp")?.value)||1;
+  if(!sell||!qty)return;
+  const it=getActive();if(!it)return;
+  const taxUnit=Math.ceil(sell*TAX);
+  const netUnit=sell-taxUnit-craft;
+  const netTotal=netUnit*qty;
+  const pct=craft>0?((netUnit/craft)*100).toFixed(1):"100";
+  const now=new Date();
+  const e={id:Date.now(),ts:Date.now(),date:now.toLocaleDateString("fr-FR"),time:now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}),
+    craftCost:craft,sell,qty,tax:taxUnit*qty,net:netTotal,pct,type:"res",buy:craft*qty};
+  it.history.unshift(e);if(it.history.length>100)it.history.pop();
+  save();
+  document.getElementById("sell-inp").value="";
+  document.getElementById("qty-inp").value="1";
+  document.getElementById("sim-box").style.display="none";
+  if(netTotal>0)showToast(`+${fmt(netTotal)} k (×${qty}) ✓`);
+  else showToast(`⚠️ Vente à perte !`,"warn");
+  renderRecent();renderHeader();renderSidebar();
+}
+
 function renderRecent(){
   const el=document.getElementById("recent-trades");if(!el)return;
   const it=getActive();if(!it||it.history.length===0){el.innerHTML="";return;}
-  el.innerHTML=`<div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:9px">Derniers échanges</div>`
+  const isRes=it.type==="res";
+  el.innerHTML=`<div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:9px">Dernières ventes</div>`
     +it.history.slice(0,5).map(e=>`
     <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border2);font-family:'Josefin Sans',sans-serif;font-size:12px">
       <div style="color:var(--txt2);font-size:11px">${e.date} ${e.time}</div>
-      <div style="color:var(--txt2)">${fmt(e.buy)}→${fmt(e.sell)}</div>
+      <div style="color:var(--txt2)">${isRes&&e.qty?`×${e.qty} · ${fmt(e.sell)}/u`:`${fmt(e.buy||0)}→${fmt(e.sell)}`}</div>
       <div style="color:${pc(e.net)};font-weight:600">${e.net>0?"+":""}${fmt(e.net)} <span style="font-size:10px;font-weight:400">(${e.pct}%)</span></div>
     </div>`).join("");
 }
 
-// ══════════════ CALC TAB ══════════════
+// ── CALC TAB ──
 function renderCalc(){
   const el=document.getElementById("tab-calc");
   el.innerHTML=`
   <div style="font-size:17px;color:var(--gold);margin-bottom:5px">🧮 Prix minimum de revente</div>
   <div style="font-size:13px;color:var(--txt2);font-family:'Josefin Sans',sans-serif;margin-bottom:18px">Prix plancher pour atteindre ta marge cible après taxe (3%).</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:15px">
-    <div><label class="lbl">💸 Prix d'achat</label><input class="inp" id="calc-buy" type="number" placeholder="ex: 850000" oninput="updateCalc()"/></div>
+    <div><label class="lbl">💸 Prix d'achat / coût craft</label><input class="inp" id="calc-buy" type="number" placeholder="ex: 850000" oninput="updateCalc()"/></div>
     <div><label class="lbl">🎯 Marge cible (%)</label><input class="inp" id="calc-tgt" type="number" placeholder="10" step="0.5" value="${settings.tgtPct}" oninput="updateCalc()"/></div>
   </div>
   <div id="calc-result"></div>
   <div id="calc-table"></div>
-  <div id="calc-empty" style="text-align:center;padding:40px;color:var(--txt3);font-family:'Josefin Sans',sans-serif">Saisis un prix d'achat</div>`;
+  <div id="calc-empty" style="text-align:center;padding:40px;color:var(--txt3);font-family:'Josefin Sans',sans-serif">Saisis un prix d'achat ou coût de craft</div>`;
 }
 
 function updateCalc(){
@@ -407,12 +501,12 @@ function updateCalc(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
       <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-bottom:3px">PRIX MIN. VENTE</div>
         <div style="font-size:22px;color:var(--gold);font-family:'Josefin Sans',sans-serif;font-weight:600">${fmt(ms)}</div>
-        <div style="font-size:10px;color:var(--txt2);font-family:'Josefin Sans',sans-serif;margin-top:1px">${ms.toLocaleString("fr-FR")} k</div></div>
+        <div style="font-size:10px;color:var(--txt2);font-family:'Josefin Sans',sans-serif">${ms.toLocaleString("fr-FR")}</div></div>
       <div><div style="font-size:8px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-bottom:3px">BÉNÉFICE ATTENDU</div>
         <div style="font-size:19px;color:#4ade80;font-family:'Josefin Sans',sans-serif;font-weight:600">+${fmt(p.net)}</div>
-        <div style="font-size:10px;color:#4ade80;font-family:'Josefin Sans',sans-serif;margin-top:1px">≥ ${tgt}% net</div></div>
+        <div style="font-size:10px;color:#4ade80;font-family:'Josefin Sans',sans-serif">≥ ${tgt}% net</div></div>
     </div>
-    <div style="margin-top:11px;padding:8px 12px;background:#ffffff07;border-radius:6px;font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--txt2)">Taxe : ~${fmt(Math.ceil(ms*TAX))} k · Net après taxe : ${fmt(ms-Math.ceil(ms*TAX))} k</div>
+    <div style="margin-top:11px;padding:8px 12px;background:#ffffff07;border-radius:6px;font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--txt2)">Taxe : ~${fmt(Math.ceil(ms*TAX))} · Net après taxe : ${fmt(ms-Math.ceil(ms*TAX))}</div>
   </div>`;
   tbl.innerHTML=`<div style="font-family:'Josefin Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase;margin-bottom:10px">Table des marges</div>
   <div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border2)">
@@ -425,10 +519,10 @@ function updateCalc(){
   </div>`;
 }
 
-// ══════════════ HISTORY TAB ══════════════
+// ── HISTORY TAB ──
 function renderHistory(){
   const el=document.getElementById("tab-history");
-  const all=items.flatMap(it=>it.history.map(e=>({...e,iname:it.name,iicon:it.icon}))).sort((a,b)=>b.id-a.id);
+  const all=items.flatMap(it=>it.history.map(e=>({...e,iname:it.name,iicon:it.icon,itype:it.type||"hdv"}))).sort((a,b)=>b.id-a.id);
   el.innerHTML=`
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:13px">
     <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt3);text-transform:uppercase">Tous les échanges (${all.length})</div>
@@ -436,20 +530,20 @@ function renderHistory(){
   </div>
   <div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border2)">
     <div class="trow" style="color:var(--txt2);font-size:9px;letter-spacing:1px;border-bottom:1px solid #b8960022">
-      <div>DATE</div><div>ARTICLE</div><div>ACHAT→VENTE</div><div>NET</div>
+      <div>DATE</div><div>ARTICLE</div><div>DÉTAIL</div><div>NET</div>
     </div>
     ${all.length===0?`<div style="padding:32px;text-align:center;color:var(--txt3);font-family:'Josefin Sans',sans-serif;font-size:12px">Aucun échange</div>`
     :all.map(e=>`
     <div class="trow">
       <div style="color:var(--txt2);font-size:10px">${e.date}</div>
-      <div style="display:flex;align-items:center;gap:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span>${e.iicon}</span><span>${e.iname}</span></div>
-      <div style="color:var(--txt2);font-size:11px">${fmt(e.buy)}→${fmt(e.sell)}</div>
+      <div style="display:flex;align-items:center;gap:3px;overflow:hidden"><span>${e.iicon}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.iname}</span></div>
+      <div style="color:var(--txt2);font-size:11px">${e.itype==="res"&&e.qty?`×${e.qty}·${fmt(e.sell)}`:`${fmt(e.buy||0)}→${fmt(e.sell)}`}</div>
       <div style="color:${pc(e.net)};font-weight:600">${e.net>0?"+":""}${fmt(e.net)}</div>
     </div>`).join("")}
   </div>`;
 }
 
-// ══════════════ CHARTS TAB ══════════════
+// ── CHARTS TAB ──
 function renderCharts(){
   const el=document.getElementById("tab-charts");
   const mode=settings.chartMode||"cumul";
@@ -462,63 +556,49 @@ function renderCharts(){
       `).join("")}
     </div>
   </div>
-  <div style="margin-bottom:13px;display:flex;gap:6px;flex-wrap:wrap" id="chart-filters">
+  <div style="margin-bottom:13px;display:flex;gap:6px;flex-wrap:wrap">
     ${items.filter(it=>it.history.length>0).map(it=>`
-    <button onclick="toggleChartItem(${it.id})" style="background:${it.color}22;border:1px solid ${it.color};border-radius:20px;padding:4px 11px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:${it.color};cursor:pointer;display:flex;align-items:center;gap:4px"><span>${it.icon}</span>${it.name}</button>
+    <button style="background:${it.color}22;border:1px solid ${it.color};border-radius:20px;padding:4px 11px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:${it.color};cursor:pointer;display:flex;align-items:center;gap:4px"><span>${it.icon}</span>${it.name}<span class="type-badge ${it.type==="res"?"badge-res":"badge-hdv"}" style="font-size:8px">${it.type==="res"?"🌿":"⚖️"}</span></button>
     `).join("")}
   </div>
   <div style="background:var(--surface);border-radius:10px;border:1px solid var(--border2);padding:16px 6px 6px">
     <canvas id="chartCanvas"></canvas>
     <div style="font-family:'Josefin Sans',sans-serif;font-size:8px;color:var(--txt3);text-align:center;margin-top:3px;letter-spacing:1px">
-      ${mode==="prix"?"Cours achat vs vente":mode==="profit"?"Profit net par transaction":"Accumulation de richesse"}
+      ${mode==="prix"?"Cours de vente par article":mode==="profit"?"Profit net par transaction":"Accumulation de richesse"}
     </div>
   </div>`;
   buildChart();
 }
 
 function setChartMode(m){settings.chartMode=m;save();renderCharts();}
-function toggleChartItem(id){/* simplified: just re-render */renderCharts();}
 
 function buildChart(){
   const canvas=document.getElementById("chartCanvas");if(!canvas)return;
   if(chartInstance){chartInstance.destroy();chartInstance=null;}
   const mode=settings.chartMode||"cumul";
   const visItems=items.filter(it=>it.history.length>0);
-  if(visItems.length===0){canvas.style.display="none";return;}
+  if(!visItems.length){canvas.style.display="none";return;}
   canvas.style.display="block";
-
   const all=visItems.flatMap(it=>[...it.history].reverse().map(e=>({...e,iname:it.name,icol:it.color}))).sort((a,b)=>a.ts-b.ts);
   const labels=all.map(e=>e.date+" "+e.time);
-
   let datasets=[];
   if(mode==="cumul"){
     const cum={};visItems.forEach(it=>{cum[it.name]=0;});
-    const rows=all.map(e=>{cum[e.iname]=(cum[e.iname]||0)+e.net;return{...cum,lbl:e.date};});
+    const rows=all.map(e=>{cum[e.iname]=(cum[e.iname]||0)+e.net;return{...JSON.parse(JSON.stringify(cum))};});
     datasets=visItems.map(it=>({label:it.name,data:rows.map(r=>r[it.name]),borderColor:it.color,backgroundColor:it.color+"22",fill:true,tension:.3,pointRadius:0}));
   } else if(mode==="profit"){
-    datasets=visItems.map(it=>{
-      const byIdx=all.map(e=>e.iname===it.name?e.net:null);
-      return{label:it.name,data:byIdx,backgroundColor:it.color,borderColor:it.color,type:"bar"};
-    });
+    datasets=visItems.map(it=>({label:it.name,data:all.map(e=>e.iname===it.name?e.net:null),backgroundColor:it.color,borderColor:it.color,type:"bar"}));
   } else {
-    datasets=visItems.flatMap(it=>[
-      {label:it.name+" achat",data:all.map(e=>e.iname===it.name?e.buy:null),borderColor:it.color+"77",fill:false,tension:.3,pointRadius:0,borderDash:[4,2]},
-      {label:it.name+" vente",data:all.map(e=>e.iname===it.name?e.sell:null),borderColor:it.color,fill:false,tension:.3,pointRadius:3},
-    ]);
+    datasets=visItems.map(it=>({label:it.name+" vente",data:all.map(e=>e.iname===it.name?e.sell:null),borderColor:it.color,fill:false,tension:.3,pointRadius:3}));
   }
-
   chartInstance=new Chart(canvas,{
-    type: mode==="profit"?"bar":"line",
+    type:mode==="profit"?"bar":"line",
     data:{labels,datasets},
-    options:{
-      responsive:true,
-      plugins:{legend:{labels:{color:"#665e4a",font:{family:"'Josefin Sans',sans-serif",size:10}}},tooltip:{backgroundColor:"#0d0e14",borderColor:"#b8960033",borderWidth:1,titleColor:"#665e4a",bodyFont:{family:"'Josefin Sans',sans-serif"},callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},
-      scales:{x:{ticks:{color:"#665e4a",font:{size:8},maxTicksLimit:6},grid:{color:"#1a1b22"}},y:{ticks:{color:"#665e4a",font:{size:8},callback:v=>fmt(v)},grid:{color:"#1a1b22"}}},
-    }
+    options:{responsive:true,plugins:{legend:{labels:{color:"#665e4a",font:{family:"'Josefin Sans',sans-serif",size:10}}},tooltip:{backgroundColor:"#0d0e14",borderColor:"#b8960033",borderWidth:1,titleColor:"#665e4a",bodyFont:{family:"'Josefin Sans',sans-serif"},callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`}}},scales:{x:{ticks:{color:"#665e4a",font:{size:8},maxTicksLimit:6},grid:{color:"#1a1b22"}},y:{ticks:{color:"#665e4a",font:{size:8},callback:v=>fmt(v)},grid:{color:"#1a1b22"}}}}
   });
 }
 
-// ══════════════ RANKINGS TAB ══════════════
+// ── RANKINGS TAB ──
 function renderRankings(){
   const el=document.getElementById("tab-rankings");
   const sorted=[...items].sort((a,b)=>b.history.reduce((s,e)=>s+e.net,0)-a.history.reduce((s,e)=>s+e.net,0));
@@ -528,12 +608,19 @@ function renderRankings(){
     const sum=it.history.reduce((s,e)=>s+e.net,0);
     const avgPct=it.history.length>0?(it.history.reduce((s,e)=>s+Number(e.pct),0)/it.history.length).toFixed(1):null;
     const best=it.history.length>0?Math.max(...it.history.map(e=>e.net)):null;
+    const totalQty=it.type==="res"?it.history.reduce((s,e)=>s+(e.qty||1),0):null;
     const medal=rank===0?"🥇":rank===1?"🥈":rank===2?"🥉":`<span style="color:var(--txt3)">#${rank+1}</span>`;
     return `<div class="rank-card">
       <div style="font-size:16px;text-align:center">${medal}</div>
       <div>
-        <div style="display:flex;align-items:center;gap:5px"><span style="font-size:14px">${it.icon}</span><span style="font-size:14px;color:var(--gold)">${it.name}</span></div>
-        <div style="font-size:10px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-top:1px">${it.history.length} trades${it.stock>0?` · 📦${it.stock}`:""}</div>
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <span style="font-size:14px">${it.icon}</span>
+          <span style="font-size:14px;color:var(--gold)">${it.name}</span>
+          <span class="type-badge ${it.type==="res"?"badge-res":"badge-hdv"}">${it.type==="res"?"🌿":"⚖️"}</span>
+        </div>
+        <div style="font-size:10px;font-family:'Josefin Sans',sans-serif;color:var(--txt2);margin-top:1px">
+          ${it.history.length} vente(s)${totalQty?` · ${totalQty} unités`:""}${it.stock>0?` · 📦${it.stock}`:""}
+        </div>
         ${it.note?`<div style="font-size:10px;color:var(--txt3);font-family:'Josefin Sans',sans-serif;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px">${it.note}</div>`:""}
       </div>
       <div style="text-align:right">
@@ -546,39 +633,36 @@ function renderRankings(){
   </div>`;
 }
 
-// ══════════════ SETTINGS TAB ══════════════
+// ── SETTINGS TAB ──
 function renderSettings(){
   const el=document.getElementById("tab-settings");
   const tp=totalProfit();
   const gk=parseInt(settings.goalKamas)||0;
   const pct=gk>0?Math.min(100,(tp/gk*100)).toFixed(1):null;
   const bestItem=[...items].sort((a,b)=>b.history.reduce((s,e)=>s+e.net,0)-a.history.reduce((s,e)=>s+e.net,0))[0];
+  const resItems=items.filter(i=>i.type==="res");
+  const totalResQty=resItems.reduce((a,it)=>a+it.history.reduce((s,e)=>s+(e.qty||1),0),0);
   el.innerHTML=`
   <div style="font-size:17px;color:var(--gold);margin-bottom:18px">⚙️ Réglages</div>
   <div style="display:grid;gap:13px">
-
     <div class="sc">
       <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Apparence</div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="font-family:'Josefin Sans',sans-serif;font-size:13px">Thème ${settings.darkMode!==false?"sombre 🌙":"clair ☀️"}</div>
-        <button class="toggle ${settings.darkMode===false?"off":""}" id="dark-toggle" onclick="toggleDark()"><div class="toggle-knob"></div></button>
+        <button class="toggle ${settings.darkMode===false?"off":""}" onclick="toggleDark()"><div class="toggle-knob"></div></button>
       </div>
     </div>
-
     <div class="sc">
       <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Objectif kamas</div>
       <label class="lbl">🎯 Objectif total (kamas)</label>
       <input class="inp" id="goal-inp" type="number" placeholder="ex: 10000000" value="${settings.goalKamas||""}" oninput="updateGoal()"/>
       ${gk>0?`<div style="margin-top:10px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--txt2)">Progression : <span style="color:${pct>=100?"#4ade80":"var(--gold)"};font-weight:600">${pct}%</span> · Reste : <span style="color:#f87171">${fmt(gk-tp)} k</span></div>`:""}
     </div>
-
     <div class="sc">
       <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Alerte de marge</div>
-      <label class="lbl">⚠️ Seuil minimum de marge (%)</label>
+      <label class="lbl">⚠️ Seuil minimum (%)</label>
       <input class="inp" id="alert-inp" type="number" step="0.5" placeholder="ex: 5" value="${settings.minAlert||"5"}" oninput="updateAlert()"/>
-      <div style="margin-top:8px;font-family:'Josefin Sans',sans-serif;font-size:11px;color:var(--txt2)">Une alerte s'affiche si tu enregistres un échange sous ${settings.minAlert}% de marge.</div>
     </div>
-
     <div class="sc">
       <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:12px">Export / Import</div>
       <button class="btn" style="width:100%;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f;margin-bottom:10px" onclick="exportCSV()">⬇ Exporter CSV complet</button>
@@ -586,38 +670,32 @@ function renderSettings(){
         <div style="width:100%;background:none;border:1px solid #b8960066;color:var(--gold);text-align:center;padding:11px 20px;font-family:'Josefin Sans',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:600;border-radius:8px">⬆ Importer CSV</div>
         <input type="file" accept=".csv,text/csv" style="display:none" onchange="importCSV(event)"/>
       </label>
-      <div style="font-family:'Josefin Sans',sans-serif;font-size:10px;color:var(--txt3);text-align:center;line-height:1.6">Importe un CSV exporté précédemment.<br/>Les données sont fusionnées sans doublons.</div>
     </div>
-
     <div class="sc">
       <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Statistiques globales</div>
       ${[
         ["💰 Profit total",fmt(tp)+" k",pc(tp)],
-        ["📊 Nombre d'échanges",totalTrades(),"var(--txt)"],
-        ["📦 Stock total suivi",items.reduce((a,it)=>a+(it.stock||0),0)+" unités","var(--gold)"],
-        ["🏆 Meilleur article",bestItem?.name||"—","var(--gold)"]
+        ["📊 Trades HDV",items.filter(i=>i.type!=="res").reduce((a,it)=>a+it.history.length,0),"var(--txt)"],
+        ["🌿 Ventes ressources",`${resItems.reduce((a,it)=>a+it.history.length,0)} (${totalResQty} unités)`,"#4ade80"],
+        ["🏆 Meilleur article",bestItem?.name||"—","var(--gold)"],
       ].map(([k,v,c])=>`
       <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border2);font-family:'Josefin Sans',sans-serif;font-size:12px">
         <span style="color:var(--txt2)">${k}</span><span style="color:${c};font-weight:600">${v}</span>
       </div>`).join("")}
     </div>
-
     <div class="sc" style="text-align:center">
       <div style="font-family:'Josefin Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--txt2);text-transform:uppercase;margin-bottom:10px">Installer sur Samsung</div>
       <div style="font-family:'Josefin Sans',sans-serif;font-size:12px;color:var(--txt2);line-height:1.8">
         1. Ouvre cette page dans <b style="color:var(--gold)">Chrome</b><br/>
-        2. Appuie sur ⋮ (les 3 points en haut à droite)<br/>
+        2. Appuie sur ⋮ (3 points en haut à droite)<br/>
         3. Sélectionne <b style="color:var(--gold)">"Ajouter à l'écran d'accueil"</b><br/>
-        4. Confirme → l'icône apparaît sur ton bureau 🎉
+        4. Confirme → icône sur ton bureau 🎉
       </div>
     </div>
   </div>`;
 }
 
-function toggleDark(){
-  settings.darkMode=settings.darkMode===false?true:false;
-  applyTheme();save();renderSettings();
-}
+function toggleDark(){settings.darkMode=settings.darkMode===false;applyTheme();save();renderSettings();}
 function applyTheme(){
   const d=settings.darkMode!==false;
   const r=document.documentElement.style;
@@ -633,10 +711,10 @@ function applyTheme(){
 function updateGoal(){settings.goalKamas=document.getElementById("goal-inp")?.value||"";save();renderHeader();}
 function updateAlert(){settings.minAlert=document.getElementById("alert-inp")?.value||"5";save();}
 
-// ══════════════ CSV ══════════════
+// ── CSV ──
 function exportCSV(){
-  const rows=[["Date","Heure","Article","Achat","Vente","Taxe","Net","Rendement %"]];
-  items.forEach(it=>[...it.history].reverse().forEach(e=>rows.push([e.date,e.time,it.name,e.buy,e.sell,e.tax,e.net,e.pct])));
+  const rows=[["Date","Heure","Article","Type","Achat/Craft","Vente","Qté","Taxe","Net","Rendement %"]];
+  items.forEach(it=>[...it.history].reverse().forEach(e=>rows.push([e.date,e.time,it.name,it.type||"hdv",e.buy||0,e.sell,e.qty||1,e.tax,e.net,e.pct])));
   const blob=new Blob(["\uFEFF"+rows.map(r=>r.join(";")).join("\n")],{type:"text/csv;charset=utf-8;"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download=`hdv_${new Date().toLocaleDateString("fr-FR").replace(/\//g,"-")}.csv`;a.click();
@@ -654,69 +732,46 @@ function importCSV(e){
       const byItem={};
       rows.forEach(r=>{
         if(r.length<7)return;
-        const [date,time,name,buy,sell,tax,net,pct]=r;
-        if(!byItem[name])byItem[name]={name,entries:[]};
-        byItem[name].entries.push({id:Date.now()+Math.random(),ts:Date.now(),date:date?.trim(),time:time?.trim(),buy:parseInt(buy)||0,sell:parseInt(sell)||0,tax:parseInt(tax)||0,net:parseInt(net)||0,pct:pct?.trim()||"0"});
+        const [date,time,name,type,buy,sell,qty,tax,net,pct]=r;
+        if(!byItem[name])byItem[name]={name,type:type?.trim()||"hdv",entries:[]};
+        byItem[name].entries.push({id:Date.now()+Math.random(),ts:Date.now(),date:date?.trim(),time:time?.trim(),buy:parseInt(buy)||0,sell:parseInt(sell)||0,qty:parseInt(qty)||1,tax:parseInt(tax)||0,net:parseInt(net)||0,pct:pct?.trim()||"0",type:type?.trim()||"hdv"});
       });
       Object.entries(byItem).forEach(([name,data])=>{
         const existing=items.find(it=>it.name===name);
         if(existing){
           const keys=new Set(existing.history.map(h=>h.date+"_"+h.time+"_"+h.buy));
-          const newE=data.entries.filter(e=>!keys.has(e.date+"_"+e.time+"_"+e.buy));
-          existing.history=[...newE,...existing.history].slice(0,100);
+          existing.history=[...data.entries.filter(e=>!keys.has(e.date+"_"+e.time+"_"+e.buy)),...existing.history].slice(0,100);
         } else {
-          items.push({id:Date.now()+Math.random(),name,icon:"📦",history:data.entries,color:COLORS[items.length%COLORS.length],stock:0,note:""});
+          items.push({id:Date.now()+Math.random(),name,icon:"📦",type:data.type,history:data.entries,color:COLORS[items.length%COLORS.length],stock:0,note:""});
         }
       });
-      save();renderAll();showToast(`Import réussi : ${rows.length} ligne(s) ✓`);
-    }catch{showToast("Erreur lors de l'import ⚠️","warn");}
+      save();renderAll();showToast(`Import réussi ✓`);
+    }catch{showToast("Erreur import ⚠️","warn");}
   };
   reader.readAsText(file,"UTF-8");
   e.target.value="";
 }
 
-// ══════════════ RENDER ALL ══════════════
-function renderAll(){
-  renderSidebar();
-  renderHeader();
-  renderTrade();
-  renderCalc();
-  renderHistory();
-  renderRankings();
-  renderSettings();
-  if(currentTab==="charts")renderCharts();
-}
-
-// ══════════════ PWA ══════════════
+// ── PWA ──
 let deferredPrompt=null;
 window.addEventListener("beforeinstallprompt",e=>{
   e.preventDefault();deferredPrompt=e;
   const banner=document.createElement("div");
   banner.id="install-banner";
   banner.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#b89600,#7a6100);color:#0a0b0f;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-family:'Josefin Sans',sans-serif;font-size:12px;letter-spacing:1px;box-shadow:0 2px 12px #00000055";
-  banner.innerHTML=`<span>⚖️ Installer HDV sur l'écran d'accueil</span><div style="display:flex;gap:8px"><button onclick="doInstall()" style="background:#0a0b0f;color:#d4a017;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:600">Installer</button><button onclick="document.getElementById('install-banner').remove()" style="background:none;border:none;color:#0a0b0f;cursor:pointer;font-size:16px;padding:0 4px">✕</button></div>`;
+  banner.innerHTML=`<span>⚖️ Installer HDV Optimizer</span><div style="display:flex;gap:8px"><button onclick="doInstall()" style="background:#0a0b0f;color:#d4a017;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:600">Installer</button><button onclick="document.getElementById('install-banner').remove()" style="background:none;border:none;color:#0a0b0f;cursor:pointer;font-size:16px;padding:0 4px">✕</button></div>`;
   document.body.appendChild(banner);
 });
+function doInstall(){if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{if(r.outcome==="accepted")document.getElementById("install-banner")?.remove();});}
 
-function doInstall(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(r=>{if(r.outcome==="accepted")document.getElementById("install-banner")?.remove();});
+// ── RENDER ALL ──
+function renderAll(){
+  renderSidebar();renderHeader();
+  renderTrade();renderCalc();renderHistory();renderRankings();renderSettings();
+  if(currentTab==="charts")renderCharts();
 }
 
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("data:application/javascript,"+encodeURIComponent(`
-    const C="hdv-v1";
-    self.addEventListener("install",e=>{self.skipWaiting();});
-    self.addEventListener("activate",e=>{self.clients.claim();});
-    self.addEventListener("fetch",e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));});
-  `)).catch(()=>{});
-}
-
-// ══════════════ INIT ══════════════
-applyTheme();
-renderAll();
-switchTab("trade");
+applyTheme();renderAll();switchTab("trade");
 </script>
 </body>
 </html>
